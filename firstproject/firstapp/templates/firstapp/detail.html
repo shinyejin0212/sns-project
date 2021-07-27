@@ -20,9 +20,10 @@
 {% endif %}
 
 <hr>
-{% if post.image %}
+  {% if post.image %}
   <p><img src="{{ post.image.url }}" alt="사진"></p>
-{% endif %}
+{%endif%}
+
 
 <p>{{post.body}}</p>
 {% if user == post.writer %}
