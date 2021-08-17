@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&display=swap" rel="stylesheet">
 <style>
@@ -7,7 +8,6 @@
       font-family: 'Yeon Sung', cursive;
     }
   </style>
-
 <section class="pagesec">
     <h1>{{post.title}}</h1>
     {% if post.writer %}
@@ -31,8 +31,8 @@
 
     <p><pre>{{post.body}}</pre></p>
     {%if request.user == post.writer%}
-        <a href="{%url 'firstapp:edit' post.id %}" class="btn_post">수정하기</a>
-        <a href="{%url 'firstapp:delete' post.id %}" class="btn_post">삭제하기</a>
+        <a href="{%url 'firstapp:edit' post.id %}" class="btn_post">수정</a>
+        <a href="{%url 'firstapp:delete' post.id %}" class="btn_post">삭제</a>
     {%endif%}
 
     <span href="#" class="like" name ="{{post.id}}" value="Like"> 
@@ -41,12 +41,12 @@
         {% if user in post.like_user_set.all %}
             <div class="alt-service-icon">
                 <i class="fas fa-heart" id ="like-icon" style="color:red;"></i>
-             </div> 
+             </div>
         <!-- <!— 아니면 비워진 하트—>          -->
         {% else %}
     
             <div class="alt-service-icon">
-                <i class="fas fa-heart" id ="like-icon" style="color:red;"></i> 
+                 <i class="far fa-heart" id ="like-icon" style="color:red;"></i> 
             </div>
     
          {% endif %}
@@ -66,13 +66,13 @@
         <!-- <!— 만약 유저가 좋아요를 눌렀다면 채운 하트로 변경—> -->
         {% if user in post.dislike_user_set.all %}
             <div class="alt-service-icon">
-                <i class="fas fa-heart" id id ="dislike-icon" style="color:black;"></i>
+                <i class="fas fa-heart" id ="dislike-icon" style="color:black;"></i>
              </div> 
         <!-- <!— 아니면 비워진 하트—>          -->
         {% else %}
     
             <div class="alt-service-icon">
-                <i class="far fa-heart" id ="dislike-icon" style="color:black;"></i> 
+                 <i class="far fa-heart" id ="dislike-icon" style="color:black;"></i> 
             </div>
     
          {% endif %}
@@ -135,7 +135,7 @@
         success: function(response){
             if (response.like_count == null) {
                 alert("로그인이 필요합니다");
-                window.location.replace("/accounts/login/");
+                window.location.replace("/account/login/");
             }
             else {
                 if (response.result == "like") {
@@ -169,7 +169,7 @@
         success: function(response){
             if (response.dislike_count == null) {
                 alert("로그인이 필요합니다");
-                window.location.replace("/accounts/login/");
+                window.location.replace("/account/login/");
             }
             else {
                 if (response.result == "dislike") {
