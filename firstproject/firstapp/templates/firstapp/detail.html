@@ -8,54 +8,187 @@
     }
   </style>
 
-<h1>{{post.title}}</h1>
-{% if post.writer %}
-    {% if 'user' in post.writer.username and post.writer.username != 'user' %}
-        작성자 : <a href="{% url 'users:mypage' post.writer.id %}">{{ post.writer.last_name }} {{ post.writer.first_name }}</a>
+<section class="pagesec">
+    <h1>{{post.title}}</h1>
+    {% if post.writer %}
+        {% if 'user' in post.writer.username %}
+            작성자 : <a href="{%url 'users:mypage' post.writer.id%}">{{ post.writer.last_name }} {{ post.writer.first_name }}</a>
+        {% else %}
+            작성자 : <a href="{%url 'users:mypage' post.writer.id%}">{{ post.writer }}</a>
+        {% endif %}
     {% else %}
-        작성자 : <a href="{% url 'users:mypage' post.writer.id %}">{{ post.writer }}</a>
+        작성자 : 알 수 없음
     {% endif %}
-{% else %}
-    작성자 : 알 수 없음
-{% endif %}
+    <hr>
+    {% if post.image%}
+        <p style="display:flex; justify-content: center;">
+            <img src="{{ post.image.url }}"  style="width:60%;" alt="사진 나올 곳">
+        </p>
+    {% endif %}
+    {% if post.summary %}
+        <h3>{{post.summary}}</h3>
+    {% endif %}
 
-<hr>
-  {% if post.image %}
-  <p><img src="{{ post.image.url }}" alt="사진"></p>
-{%endif%}
+    <p><pre>{{post.body}}</pre></p>
+    {%if request.user == post.writer%}
+        <a href="{%url 'firstapp:edit' post.id %}" class="btn_post">수정하기</a>
+        <a href="{%url 'firstapp:delete' post.id %}" class="btn_post">삭제하기</a>
+    {%endif%}
 
+    <span href="#" class="like" name ="{{post.id}}" value="Like"> 
 
-<p>{{post.body}}</p>
-{% if user == post.writer %}
-  <a href = "{%url 'firstapp:edit' post.id%}">수정하기</a>
-  <a href = "{%url 'firstapp:delete' post.id%}">삭제하기</a>
-{% endif %}
-<div>
-  <form action="{%url 'firstapp:create_comment' post.id%}" method="POST">
-    {%csrf_token%}
-    <textarea name="content" placeholder="댓글내용입력"></textarea>
-    <input type="submit" value="확인"> 
-  </form>
-</div>
+        <!-- <!— 만약 유저가 좋아요를 눌렀다면 채운 하트로 변경—> -->
+        {% if user in post.like_user_set.all %}
+            <div class="alt-service-icon">
+                <i class="fas fa-heart" id ="like-icon" style="color:red;"></i>
+             </div> 
+        <!-- <!— 아니면 비워진 하트—>          -->
+        {% else %}
+    
+            <div class="alt-service-icon">
+                <i class="fas fa-heart" id ="like-icon" style="color:red;"></i> 
+            </div>
+    
+         {% endif %}
+    
+         <span id="likecount-{{ post.id }}" class="alt-services-title font-alt"> 
+            좋아요 
+            {% if post.like_count == 0 %} 
+                0개 
+            {% else %}
+                {{ post.like_count }}개
+            {% endif %}
+         </span>
+    </span>
 
-<div>
-  {%for comment in comments%}
-  <div>
-      {% if comment.writer %}
-          {% if 'user' in comment.writer.username %}
-              작성자 : {{ comment.writer.last_name }} {{ comment.writer.first_name }}
-          {% else %}
-              작성자 : {{ comment.writer }}
-          {% endif %}
-      {% else %}
-          작성자 : 알 수 없음
-      {% endif %}
-      <br>
-      {{comment.content}}
-      <br>
-      <a href="{%url 'firstapp:edit_comment' comment.id %}" class="btn_post">수정</a>
-      <a href="{%url 'firstapp:delete_comment' comment.id %}" class="btn_post">삭제</a>
-  </div><hr>
-  {%endfor%}
-</div>
+    <span href="#" class="dislike" name ="{{post.id}}" value="Dislike"> 
+
+        <!-- <!— 만약 유저가 좋아요를 눌렀다면 채운 하트로 변경—> -->
+        {% if user in post.dislike_user_set.all %}
+            <div class="alt-service-icon">
+                <i class="fas fa-heart" id id ="dislike-icon" style="color:black;"></i>
+             </div> 
+        <!-- <!— 아니면 비워진 하트—>          -->
+        {% else %}
+    
+            <div class="alt-service-icon">
+                <i class="far fa-heart" id ="dislike-icon" style="color:black;"></i> 
+            </div>
+    
+         {% endif %}
+    
+         <span id="dislikecount-{{ post.id }}" class="alt-services-title font-alt"> 
+            싫어요
+            {% if post.dislike_count == 0 %} 
+                0개 
+            {% else %}
+                {{ post.dislike_count }}개
+            {% endif %}
+         </span>
+    </span>
+
+    <hr>
+    <h5>Comments</h5>
+    {%if user.is_authenticated%}
+    <div>
+        <form action="{%url 'firstapp:create_comment' post.id%}" method="POST">
+            {%csrf_token%}
+            <textarea name="content" placeholder="댓글내용입력"></textarea>
+            <input type="submit" value="확인">
+        </form>
+    </div>
+    {%endif%}
+
+    <div>
+        {%for comment in comments%}
+        <div>
+            {% if comment.writer %}
+                {% if 'user' in comment.writer.username %}
+                    작성자 : {{ comment.writer.last_name }} {{ comment.writer.first_name }}
+                {% else %}
+                    작성자 : <a href="{%url 'users:mypage' comment.writer.id%}">{{ comment.writer }}</a>
+                {% endif %}
+            {% else %}
+                작성자 : 알 수 없음
+            {% endif %}
+            <br>
+            댓글 내용:{{comment.content}}
+            {%if comment.writer == request.user%}
+                <a href="{%url 'firstapp:edit_comment' comment.id %}" class="btn_post">댓글수정</a>
+                <a href="{%url 'firstapp:delete_comment' comment.id %}" class="btn_post">댓글삭제</a>
+            {%endif%}
+        </div><br>
+        {%endfor%}
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script>
+    $(".like").click(function(){
+        var pk = $(this).attr('name')
+    $.ajax({
+        type:"POST",
+        url: "{% url 'firstapp:like_toggle' post.pk %}",
+        data: {'pk': pk, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+        dataType: "json",
+
+        success: function(response){
+            if (response.like_count == null) {
+                alert("로그인이 필요합니다");
+                window.location.replace("/accounts/login/");
+            }
+            else {
+                if (response.result == "like") {
+                    $('#like-icon').removeClass();
+                    $('#like-icon').addClass('fas fa-heart');
+                }
+                else {
+                    $('#like-icon').removeClass();
+                    $('#like-icon').addClass('far fa-heart');
+                }
+                $('#likecount-{{ post.id }}').html('좋아요 '+response.like_count+'개');
+            }
+        },
+        error:function(request,status,error){
+            alert('로그인이 필요합니다');
+            alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        },
+            })
+        })
+</script>
+
+<script>
+    $(".dislike").click(function(){
+        var pk = $(this).attr('name')
+    $.ajax({
+        type:"POST",
+        url: "{% url 'firstapp:dislike_toggle' post.pk %}",
+        data: {'pk': pk, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+        dataType: "json",
+
+        success: function(response){
+            if (response.dislike_count == null) {
+                alert("로그인이 필요합니다");
+                window.location.replace("/accounts/login/");
+            }
+            else {
+                if (response.result == "dislike") {
+                    $('#dislike-icon').removeClass();
+                    $('#dislike-icon').addClass('fas fa-heart');
+                }
+                else {
+                    $('#dislike-icon').removeClass();
+                    $('#dislike-icon').addClass('far fa-heart');
+                }
+                $('#dislikecount-{{ post.id }}').html('싫어요 '+response.dislike_count+'개');
+            }
+        },
+        error:function(request,status,error){
+            alert('로그인이 필요합니다');
+            alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        },
+            })
+        })
+</script>
 {% endblock %}
+
